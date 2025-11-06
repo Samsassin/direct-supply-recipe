@@ -27,7 +27,7 @@ public class RecipeConfig {
         log.info("Loading recipes");
         Resource resource = resourceLoader.getResource("classpath:recipes.json");
         try (InputStream inputStream = resource.getInputStream()) {
-            return objectMapper.readValue(inputStream, new TypeReference<List<Recipe>>() {});
+            return objectMapper.readValue(inputStream, new TypeReference<>() {});
         }
     }
 

@@ -29,8 +29,7 @@ public class RecipeController {
     public ResponseEntity<Recipe> getRecipe(@PathVariable String recipeName) {
         log.info("Get recipe: {}", recipeName);
         Recipe recipe = recipeService.getRecipe(recipeName);
-        ResponseEntity<Recipe> response = ResponseEntity.ok(recipe);
-        return response;
+        return ResponseEntity.ok(recipe);
     }
 
     @GetMapping("/recipe/{recipeName}/instructions")
