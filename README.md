@@ -1,23 +1,58 @@
-# direct-supply-recipe
+# Direct Supply: Recipe Challenge
 
-A simple interview coding challenge. This README organizes and clarifies the instructions, calls out assumptions, and explains how to run/test the app in this repository.
+This README explains how to run and test the app, lists assumptions, and documents the current API used by the UI.
+
+## How to Run
+
+### Quick start
+- Start the backend (Spring Boot + Gradle):
+  - Windows PowerShell/CMD: `gradlew.bat bootRun`
+  - macOS/Linux: `./gradlew bootRun`
+  - Backend URL: http://localhost:8080
+- Start the frontend (Angular 18 + Angular Material):
+  1) Open a terminal in `ui/`
+  2) Install deps: `npm install`
+  3) Run dev server: `npm start`
+  - UI URL: http://localhost:4200
+  - API calls from the UI to `/recipe` are proxied to the backend at http://localhost:8080
+
+### Prerequisites
+- Backend: Java 21, Gradle wrapper (included: `gradlew`/`gradlew.bat`)
+- Frontend: Node.js 20+ and npm 10+
+
+### Configuration
+- Backend port defaults to 8080. You can change it in `src/main/resources/application.properties` using `server.port=XXXX`.
+- The UI dev proxy routes `/recipe` to the backend. If you change backend ports, update the UI proxy config accordingly (see `ui` scripts/config).
+
+### Notes
+- Ensure the Spring Boot backend is running so the UI can fetch data.
+- The UI provides:
+  - A list of recipes loaded from GET `/recipe`
+  - A details view with ingredients
+  - Generated instructions from GET `/recipe/{title}/instructions`
+
+## Build
+- Backend (assemble JAR and run tests):
+  - Windows: `gradlew.bat build`
+  - macOS/Linux: `./gradlew build`
+  - Output: `build/libs/` (e.g., `direct-supply-recipe-<version>.jar`)
+- Frontend (production build):
+  - From `ui/`: `npm run build`
+  - Output: `ui/dist/`
 
 ## Challenge Overview
 Build a minimal web application with a preconfigured front end and back end. Do not spend time on polish or tests.
 
 ### Required Pages
-- Recipes list page: Lists available recipes stored in the back end. Clicking a recipe navigates to that recipe’s page.
+- Recipes list page: Lists available recipes stored in the back end; clicking a recipe navigates to that recipe’s page.
 - Recipe detail page: Shows the ingredients for a selected recipe. No interactive elements are required on this page.
 
 ### Technology
-- "Use whatever frameworks you like." Spring Boot + Gradle chosen for backend.
-- No full database is required; an in-memory data store (e.g., Java collections) is sufficient.
-- Optional/ideal: Access to LLM models for programmatic (1) completions and (2) embeddings, e.g., via a local OpenAI-compatible HTTP server (LM Studio, etc.). The quality of LLM responses is not important for the interview; this is optional.
-- You may use LLM-assisted IDEs during development. Parts of the interview may ask you to produce pseudo-code without LLM assistance.
+- Spring Boot + Gradle for the backend.
+- In-memory data store (Java collections) instead of a full database.
+- Optional: access to LLM models (completions, embeddings) via an OpenAI‑compatible server; quality is not important for the interview.
 
-## Provided Meal Plan Data (from prompt)
-The prompt supplies a list of recipes in JSON form. The original snippet contains a couple of formatting issues (trailing comma, stray whitespace). Below is a corrected JSON payload that preserves the intent:
-
+## Provided Meal Plan Data
 ```json
 [
   {
@@ -61,43 +96,32 @@ The prompt supplies a list of recipes in JSON form. The original snippet contain
 ```
 
 ## Assumptions & Clarifications
-- Routing/navigation: A simple two-page flow is sufficient — list -> details. No need for create/edit/delete.
-- Data source: Use in-memory storage initialized at startup from the provided JSON payload. No persistence across restarts is required.
-- Units: Ingredient quantities include unit strings (e.g., "g"). We will treat these as display text and not parse units unless needed.
-- IDs/slugs: Recipes can be identified by index, title-derived slug, or generated UUID; titles are assumed unique for simplicity.
-- Error cases: Minimal handling is acceptable (e.g., 404 if a recipe is not found). No authentication/authorization required.
-- Front end: Minimal HTML or a lightweight framework (e.g., server-side templates or a simple static SPA) is acceptable. No styling requirements.
-- LLM usage: Entirely optional. If used, keep it behind a feature flag or simple configuration.
-- Performance: The dataset is tiny; no special performance work is necessary.
+- Routing: simple two-page flow — list → details. No create/edit/delete.
+- Data source: in-memory storage initialized at startup from the provided JSON payload. No persistence across restarts.
+- Units: ingredient quantities are treated as display text (no unit parsing).
+- IDs/slugs: titles are assumed unique; title can identify a recipe.
+- Error cases: minimal handling (e.g., 404 if a recipe is not found). No auth.
+- Front end: minimal UI with Angular + Material; no styling requirements beyond defaults.
+- LLM usage: optional and behind configuration.
+- Performance: tiny dataset; no special performance work.
 
-## Suggested API Shape (minimal)
-- GET `/api/recipes` -> returns an array of recipes with `title`, `yield`, and optionally an `id`/`slug`.
-- GET `/api/recipes/{id}` -> returns the full recipe including `ingredients`.
+## API Reference (current)
+Endpoints used by the UI and provided by the backend:
+- GET `/recipe` — returns an array of recipes with at least `title` and `yield`.
+- GET `/recipe/{title}` — returns the full recipe, including `ingredients`.
+- GET `/recipe/{title}/instructions` — returns generated instructions for the specified recipe.
 
-Front-end pages can consume these endpoints or be rendered server-side.
-
-## How to Run (this repository)
-This repo uses Spring Boot with Gradle.
-
-Prerequisites:
-- Java 21 (or the version specified in `build.gradle` if different)
-- Gradle wrapper (included): `gradlew`/`gradlew.bat`
-
-Commands:
-- Windows PowerShell/CMD: `gradlew.bat bootRun`
-- macOS/Linux (if applicable): `./gradlew bootRun`
-
-The app will start on `http://localhost:8080/` by default. Adjust the port in `src/main/resources/application.properties` if needed.
+Note: Previous drafts mentioned `/api/recipes` endpoints; those were conceptual. The current implementation and UI use `/recipe`.
 
 ## How to Test (lightweight)
-- Manual verification via browser or `curl`/Postman is sufficient per the prompt (tests not required).
-- If you do add tests, run with: `gradlew.bat test`.
+- Manual verification via browser, `curl`, or Postman is sufficient per the prompt.
+- If you add tests: `gradlew.bat test` (or `./gradlew test` on macOS/Linux).
 
 ## Optional: LLM Integration Notes
 If you choose to integrate LLM calls:
-- Provide two client methods: `complete(prompt)` and `embed(texts[])` using an OpenAI-compatible base URL and API key.
+- Provide two client methods: `complete(prompt)` and `embed(texts[])` against an OpenAI‑compatible base URL and API key.
 - Make base URL and key configurable via environment variables or `application.properties`.
-- Keep the feature optional; fall back to non-LLM behavior if not configured.
+- Keep the feature optional; fall back to non‑LLM behavior if not configured.
 
 ## Future Enhancements (out of scope for now)
 - Persist recipes in a real database.
@@ -105,28 +129,6 @@ If you choose to integrate LLM calls:
 - Improve error handling, input validation, and accessibility.
 - Add automated tests and CI.
 
-## Metadata
-- Local date/time for this attempt: 2025-11-05 12:08
 
 
 
-## Frontend (Angular + Angular Material)
-A minimal Angular 18 UI is included in the ui/ directory, styled with the latest Angular Material.
-
-Prerequisites:
-- Node.js 20+ and npm 10+
-
-Run the UI in development mode:
-1. Open a terminal in ui/
-2. Install dependencies: npm install
-3. Start the dev server with backend proxy: npm start
-   - This serves the UI on http://localhost:4200
-   - API requests to /recipe are proxied to the Spring Boot backend at http://localhost:8080
-
-Notes:
-- Ensure the Spring Boot backend is running (gradlew.bat bootRun) so the UI can fetch data.
-- Material theme is set to indigo-pink via prebuilt theme; you can switch themes in ui/angular.json styles.
-- The UI provides:
-  - A list of recipes loaded from GET /recipe
-  - A details view with ingredients
-  - Generated instructions loaded from GET /recipe/{title}/instructions

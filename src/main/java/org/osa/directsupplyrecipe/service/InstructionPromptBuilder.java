@@ -4,13 +4,19 @@ import org.osa.directsupplyrecipe.model.Recipe;
 import org.springframework.stereotype.Component;
 
 /**
- * Builds the instruction-generation prompt text for a given recipe.
+ * The {@code InstructionPromptBuilder} class is responsible for constructing
+ * text prompts that serve as input for generating cooking instructions based on a given recipe.
+ * The generated prompt is specifically formatted to request cooking instructions
+ * in the form of a JSON array, adhering to certain constraints.
  */
 @Component
 public class InstructionPromptBuilder {
 
     /**
-     * Build a clear, constrained prompt for the model based on the given recipe.
+     * Builds the instruction-generation prompt text for the provided recipe.
+     *
+     * @param recipe the {@code Recipe} object containing details such as title, yield, and ingredients
+     * @return a formatted string serving as a prompt for generating cooking instructions
      */
     public String build(Recipe recipe) {
         StringBuilder sb = new StringBuilder();
