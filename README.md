@@ -106,6 +106,7 @@ Build a minimal web application with a preconfigured front end and back end. Do 
 - Performance: tiny dataset; no special performance work.
 
 ## API Reference (current)
+An OpenAPI 3.1 specification is available at ./docs/openapi.yaml.
 Endpoints used by the UI and provided by the backend:
 - GET `/recipe` — returns an array of recipes with at least `title` and `yield`.
 - GET `/recipe/{title}` — returns the full recipe, including `ingredients`.
