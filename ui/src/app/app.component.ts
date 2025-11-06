@@ -18,63 +18,8 @@ import { RecipeService, Recipe } from './recipe.service';
     MatButtonModule,
     MatProgressSpinnerModule
   ],
-  template: `
-    <mat-toolbar color="primary">Direct Supply Recipes</mat-toolbar>
-
-    <div class="container">
-      <div class="list">
-        <mat-card>
-          <h2>Recipes</h2>
-          <ng-container *ngIf="recipesLoading(); else recipesList">
-            <div class="center"><mat-progress-spinner mode="indeterminate" diameter="36"></mat-progress-spinner></div>
-          </ng-container>
-          <ng-template #recipesList>
-            <mat-nav-list>
-              <a mat-list-item *ngFor="let r of recipes()" (click)="select(r)" [class.active]="selected()?.title===r.title">
-                {{ r.title }}
-              </a>
-            </mat-nav-list>
-          </ng-template>
-        </mat-card>
-      </div>
-
-      <div class="details">
-        <mat-card *ngIf="selected(); else empty">
-          <h2>{{ selected()?.title }}</h2>
-          <p>Serves: {{ selected()?.yield }}</p>
-
-          <h3>Ingredients</h3>
-          <ul>
-            <li *ngFor="let ing of selected()?.ingredients">{{ ing }}</li>
-          </ul>
-
-          <h3>Instructions</h3>
-          <ng-container *ngIf="instructionsLoading(); else steps">
-            <div class="center"><mat-progress-spinner mode="indeterminate" diameter="36"></mat-progress-spinner></div>
-          </ng-container>
-          <ng-template #steps>
-            <ol>
-              <li *ngFor="let s of instructions()">{{ s }}</li>
-            </ol>
-            <button mat-raised-button color="primary" (click)="refreshInstructions()">Regenerate</button>
-          </ng-template>
-        </mat-card>
-        <ng-template #empty>
-          <mat-card>
-            <p>Select a recipe to view details.</p>
-          </mat-card>
-        </ng-template>
-      </div>
-    </div>
-  `,
-  styles: [`
-    .container{display:flex;gap:16px;padding:16px;}
-    .list{flex:1;min-width:260px;}
-    .details{flex:2;}
-    .center{display:flex;justify-content:center;align-items:center;padding:16px;}
-    a.mat-list-item.active{background:#e3f2fd;}
-    h2{margin-top:0}
-  `]
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css']
 })
 export class AppComponent {
   private api = inject(RecipeService);
@@ -87,10 +32,20 @@ export class AppComponent {
   instructions = signal<string[]>([]);
   instructionsLoading = signal<boolean>(false);
 
+  /**
+   * Lifecycle constructor invoked when the component is created.
+   * Triggers the initial load of recipes from the backend.
+   */
   constructor() {
     this.loadRecipes();
   }
 
+  /**
+   * Fetches the list of recipes from the API service and updates reactive signals.
+   * - Sets recipesLoading=true while request is in-flight.
+   * - On success: populates recipes and marks loading=false.
+   * - On error: clears recipes and marks loading=false to unblock the UI.
+   */
   loadRecipes() {
     this.recipesLoading.set(true);
     this.api.getRecipes().subscribe({
@@ -105,16 +60,29 @@ export class AppComponent {
     });
   }
 
+  /**
+   * Selects a recipe from the list and loads its instructions.
+   * @param r Recipe to select
+   */
   select(r: Recipe) {
     this.selected.set(r);
     this.fetchInstructions(r.title);
   }
 
+  /**
+   * Re-fetches instructions for the currently selected recipe (if any).
+   * Safe to call when nothing is selected; it will no-op.
+   */
   refreshInstructions() {
     const r = this.selected();
     if (r) this.fetchInstructions(r.title);
   }
 
+  /**
+   * Internal helper to fetch step-by-step instructions for a given recipe name.
+   * Handles loading state and error fallback (clears instructions on error).
+   * @param name Recipe title to query for instructions
+   */
   private fetchInstructions(name: string) {
     this.instructionsLoading.set(true);
     this.instructions.set([]);

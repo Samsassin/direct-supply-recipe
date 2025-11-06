@@ -83,6 +83,7 @@ public class RecipeService {
         String promptText = instructionPromptBuilder.build(recipe);
         String rawResponse = generateInstructionResponse(promptText);
         log.info("Gemini response: {}", rawResponse);
+        //TODO: [improvement] use Gemini's structured output to make things simpler.
         return parseInstructionSteps(rawResponse);
     }
 

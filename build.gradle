@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.5.7'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'org.springdoc.openapi-gradle-plugin' version '1.8.0'
 }
 
 group = 'org.osa'
@@ -9,8 +10,10 @@ version = '0.0.1-SNAPSHOT'
 description = 'direct-supply-recipe'
 
 java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
     toolchain {
-        languageVersion = JavaLanguageVersion.of(25)
+        languageVersion = JavaLanguageVersion.of(17)
     }
 }
 
@@ -31,6 +34,8 @@ ext {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'com.google.genai:google-genai:1.0.0'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-api:2.8.9'
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
@@ -47,4 +52,24 @@ dependencyManagement {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+openApi {
+    apiDocsUrl.set("http://localhost:8080/v3/api-docs")
+    outputDir.set(file("${rootDir}\\docs"))
+    outputFileName.set("openapi.yaml")
+    waitTimeInSeconds.set(30)
+    customBootRun {
+        // You can pass active profile or other args if needed
+        args.set([])
+    }
+}
+
+// Workaround for Gradle error accessing 'workingDir' inputs on the helper task created by the OpenAPI plugin
+// See: https://docs.gradle.org/8.14.3/userguide/incremental_build.html#sec:disable-state-tracking
+// Disable state tracking specifically for the 'forkedSpringBootRun' task if/when it exists
+tasks.configureEach { t ->
+    if (t.name == 'forkedSpringBootRun') {
+        t.doNotTrackState("Disable state tracking for forkedSpringBootRun to avoid unreadable input 'workingDir'.")
+    }
 }

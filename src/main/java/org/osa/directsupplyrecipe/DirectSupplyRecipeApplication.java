@@ -28,7 +28,7 @@ public class DirectSupplyRecipeApplication {
      * @param args command-line arguments passed to the application,
      *             which can be used for configuration or processing purposes.
      */
-    static void main(String[] args) {
+    public static void main(String[] args) {
         SpringApplication.run(DirectSupplyRecipeApplication.class, args);
     }
 

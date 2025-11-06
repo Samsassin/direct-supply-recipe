@@ -1,0 +1,47 @@
+<mat-toolbar color="primary">Direct Supply Recipes</mat-toolbar>
+
+<div class="container">
+  <div class="list">
+    <mat-card>
+      <h2>Recipes</h2>
+      <ng-container *ngIf="recipesLoading(); else recipesList">
+        <div class="center"><mat-progress-spinner mode="indeterminate" diameter="36"></mat-progress-spinner></div>
+      </ng-container>
+      <ng-template #recipesList>
+        <mat-nav-list>
+          <a mat-list-item *ngFor="let r of recipes()" (click)="select(r)" [class.active]="selected()?.title===r.title">
+            {{ r.title }}
+          </a>
+        </mat-nav-list>
+      </ng-template>
+    </mat-card>
+  </div>
+
+  <div class="details">
+    <mat-card *ngIf="selected(); else empty">
+      <h2>{{ selected()?.title }}</h2>
+      <p>Serves: {{ selected()?.yield }}</p>
+
+      <h3>Ingredients</h3>
+      <ul>
+        <li *ngFor="let ing of selected()?.ingredients">{{ ing }}</li>
+      </ul>
+
+      <h3>Instructions</h3>
+      <ng-container *ngIf="instructionsLoading(); else steps">
+        <div class="center"><mat-progress-spinner mode="indeterminate" diameter="36"></mat-progress-spinner></div>
+      </ng-container>
+      <ng-template #steps>
+        <ol>
+          <li *ngFor="let s of instructions()">{{ s }}</li>
+        </ol>
+        <button mat-raised-button color="primary" (click)="refreshInstructions()" [disabled]="instructionsLoading()">Regenerate</button>
+      </ng-template>
+    </mat-card>
+    <ng-template #empty>
+      <mat-card>
+        <p>Select a recipe to view details.</p>
+      </mat-card>
+    </ng-template>
+  </div>
+</div>
